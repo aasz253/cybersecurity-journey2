@@ -11,6 +11,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN a2enmod rewrite
 
-COPY php.ini /usr/local/etc/php/php.ini 2>/dev/null || true
+COPY php.ini /usr/local/etc/php/php.ini
 
 EXPOSE 80
