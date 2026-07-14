@@ -1,5 +1,3 @@
-version: '3.8'
-
 # ============================================
 # Web Security Lab Environment
 # Docker Compose Configuration
@@ -7,29 +5,9 @@ version: '3.8'
 
 services:
 
-  # Main vulnerable web application
-  web:
-    build:
-      context: ./web-app
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=lab_password
-      - DB_NAME=testdb
-    volumes:
-      - ./web-app:/var/www/html
-    depends_on:
-      - db
-    networks:
-      - lab-network
-
   # MySQL Database
   db:
-    image: mysql:5.7
+    image: mysql:8.0
     environment:
       - MYSQL_ROOT_PASSWORD=lab_password
       - MYSQL_DATABASE=testdb
@@ -38,6 +16,11 @@ services:
       - db-data:/var/lib/mysql
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-plab_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - lab-network
 
@@ -51,35 +34,40 @@ services:
       - PMA_USER=root
       - PMA_PASSWORD=lab_password
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - lab-network
 
-  # SQL Injection lab (DVWA-style)
-  sqli-lab:
-    image: vulnerables/web-sqli
+  # DVWA - Damn Vulnerable Web Application
+  dvwa:
+    image: vulnerables/web-dvwa
     ports:
       - "8080:80"
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=lab_password
+      - PHPIDS=0
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - lab-network
 
-  # XSS demonstration lab
-  xss-lab:
+  # Custom vulnerable web app (SQLi + XSS labs)
+  web-labs:
     build:
-      context: ./xss-lab
+      context: ./web-labs
       dockerfile: Dockerfile
     ports:
-      - "8081:80"
-    networks:
-      - lab-network
-
-  # Wireshark / tshark for analysis
-  network-tools:
-    image: ubuntu:latest
-    command: >
-      bash -c "apt-get update &&
-      apt-get install -y wireshark-common tshark tcpdump &&
-      echo 'Network tools ready. Use: docker exec -it network-tools tshark'"
+      - "80:80"
+    volumes:
+      - ./web-labs/app:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - lab-network
 
