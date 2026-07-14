@@ -22,7 +22,7 @@
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║  Name    : Sifuna Denson                                     ║
+║  Name    : Sifuna Anthony                                    ║
 ║  Alias   : Sifuna Codex                                      ║
 ║  Role    : Cybersecurity Student                             ║
 ║  Focus   : Network Analysis & Web Security                   ║
