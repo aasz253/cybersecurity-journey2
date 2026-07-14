@@ -1,0 +1,40 @@
+# GET Request Example
+
+```http
+GET /index.html HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Cookie: sessionId=abc123def456; theme=dark; lang=en
+If-None-Match: "33a64df551425fcc55e4d42a148795d9f25f89d4"
+If-Modified-Since: Wed, 01 Jan 2026 00:00:00 GMT
+```
+
+## Key Points
+
+- GET requests should NEVER modify server data
+- Parameters are sent in the URL query string
+- GET requests are bookmarkable
+- GET requests should not include sensitive data
+- GET requests can be cached by browsers
+
+## Query Parameters
+
+```
+GET /search?q=wireshark&page=1&sort=date HTTP/1.1
+Host: www.example.com
+
+Multiple parameters separated by &
+Each parameter is key=value
+Special characters must be URL encoded
+```
+
+## Security Considerations
+
+- Sensitive data in URL is visible in browser history
+- URL can be modified by user
+- Referrer header leaks URL to other sites
+- Not suitable for authentication credentials

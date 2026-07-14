@@ -1,0 +1,69 @@
+# POST Request Example
+
+```http
+POST /login HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 53
+Origin: https://www.example.com
+Referer: https://www.example.com/login
+Cookie: sessionId=abc123def456
+
+username=admin&password=secret123&csrf_token=a1b2c3d4e5f6
+```
+
+## POST with JSON
+
+```http
+POST /api/users HTTP/1.1
+Host: www.example.com
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Length: 89
+
+{
+    "username": "sifuna",
+    "email": "sifuna@example.com",
+    "password": "securePassword123"
+}
+```
+
+## Multipart POST (File Upload)
+
+```http
+POST /upload HTTP/1.1
+Host: www.example.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+Content-Length: 523
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="document.pdf"
+Content-Type: application/pdf
+
+<binary data>
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+Security document
+------WebKitFormBoundary--
+```
+
+## Key Points
+
+- POST data is sent in the request body (not URL)
+- Used for creating or modifying resources
+- Not cached by default
+- Not bookmarkable
+- Content-Type header specifies body format
+
+## Security Considerations
+
+- Still needs HTTPS to encrypt body data
+- CSRF tokens should be included
+- Validate and sanitize all input
+- Rate limit login attempts
+- Log all POST attempts for audit
